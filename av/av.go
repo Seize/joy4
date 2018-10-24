@@ -398,6 +398,17 @@ const (
 	InterlacedBFF // Bottom Field First
 )
 
+func (s ScanningMode) String() string {
+	switch s {
+	case Progressive:
+		return "Progressive"
+	case InterlacedTFF:
+		return "InterlacedTFF"
+	case InterlacedBFF:
+		return "InterlacedBFF"
+	}
+	return "Unknown scanning mode"
+}
 
 type BitrateMeasure struct {
 	lastPrint time.Time
@@ -425,4 +436,8 @@ func (bm *BitrateMeasure) Measure(size int) (measureReady bool, bitrateKbps int)
 		}
 	}
 	return false, 0
+}
+
+func (bm BitrateMeasure) String() string {
+	return fmt.Sprintf("%d kbps", bm.AvgKbps)
 }
