@@ -220,14 +220,27 @@ func (self *FramerateConverter) Close() {
 	}
 }
 
-// FreeOutputImage frees all allocated images stored in outputFrames
-func (self *FramerateConverter) FreeOutputImage(idx int) {
+// FreeFirstOutputImage frees the allocated image at the start of the queue "outputFrames"
+func (self *FramerateConverter) FreeFirstOutputImage() {
 	if self != nil {
-		if idx < len(self.outputFrames) {
-			if self.outputFrames[idx] != nil {
-				C.av_frame_free(&self.outputFrames[idx])
-			}
-			self.outputFrames = self.outputFrames[:idx+copy(self.outputFrames[idx:], self.outputFrames[idx+1:])]
+		if len(self.outputFrames) <= 0 {
+			return
+		}
+
+		if self.outputFrames[0] != nil {
+			C.av_frame_free(&self.outputFrames[0])
+		}
+
+		// Remove [0] from the queue
+		self.outputFrames = self.outputFrames[1:]
+	}
+}
+
+// FreeOutputImages frees all allocated images stored in outputFrames
+func (self *FramerateConverter) FreeOutputImages() {
+	if self != nil {
+		for len(self.outputFrames) > 0 {
+			self.FreeFirstOutputImage()
 		}
 	}
 }
@@ -605,7 +618,7 @@ func (enc *VideoEncoder) Encode(img *VideoFrame) (pkts [][]byte, err error) {
 		if frames, err = enc.convertFramerate(img); err != nil {
 			return nil, err
 		}
-		if frames == nil || len(frames) == 0 {
+		if frames == nil || len(frames) <= 0 {
 			return
 		}
 	} else {
@@ -614,17 +627,17 @@ func (enc *VideoEncoder) Encode(img *VideoFrame) (pkts [][]byte, err error) {
 
 	// When converting to a framerate higher than that of the input,
 	// convertFramerate can return multiple frames, so process them all here.
-	for idx, f := range frames {
+	for _, f := range frames {
 		if PixelFormatFF2AV(int32(f.frame.format)) != enc.pixelFormat || f.Width() != enc.width || f.Height() != enc.height {
 			if f, err = enc.scale(f); err != nil {
-				enc.framerateConverter.FreeOutputImage(idx)
+				enc.framerateConverter.FreeOutputImages()
 				return nil, err
 			}
 		}
 
 		if gotpkt, pkt, err = enc.encodeOne(f); err != nil {
 			enc.scaler.FreeOutputImage()
-			enc.framerateConverter.FreeOutputImage(idx)
+			enc.framerateConverter.FreeOutputImages()
 			return nil, err
 		}
 		if gotpkt {
@@ -632,7 +645,7 @@ func (enc *VideoEncoder) Encode(img *VideoFrame) (pkts [][]byte, err error) {
 		}
 
 		enc.scaler.FreeOutputImage()
-		enc.framerateConverter.FreeOutputImage(idx)
+		enc.framerateConverter.FreeFirstOutputImage()
 	}
 	return
 }
