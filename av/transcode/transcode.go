@@ -103,7 +103,7 @@ func (self *tStream) audioDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 	}
 
 	if dur, err = self.adecodec.PacketDuration(inpkt.Data); err != nil {
-		err = fmt.Errorf("transcode: PacketDuration() failed for input stream #%d", inpkt.Idx)
+		err = fmt.Errorf("transcode: PacketDuration() failed for input audio stream #%d", inpkt.Idx)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (self *tStream) audioDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 	}
 	for _, _outpkt := range _outpkts {
 		if dur, err = self.aencodec.PacketDuration(_outpkt); err != nil {
-			err = fmt.Errorf("transcode: PacketDuration() failed for output stream #%d", inpkt.Idx)
+			err = fmt.Errorf("transcode: PacketDuration() failed for output audio stream #%d", inpkt.Idx)
 			return
 		}
 		outpkt := av.Packet{Idx: inpkt.Idx, Data: _outpkt}
@@ -142,7 +142,7 @@ func (self *tStream) videoDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 	}
 
 	if dur, err = self.vdecodec.PacketDuration(inpkt.Data); err != nil {
-		err = fmt.Errorf("transcode: PacketDuration() failed for input stream #%d", inpkt.Idx)
+		err = fmt.Errorf("transcode: PacketDuration() failed for input video stream #%d", inpkt.Idx)
 		return
 	}
 
@@ -167,7 +167,7 @@ func (self *tStream) videoDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 			self.vencodec = codecData.(av.VideoCodecData)
 		}
 		if dur, err = self.vencodec.PacketDuration(_outpkt); err != nil {
-			err = fmt.Errorf("transcode: PacketDuration() failed for output stream #%d", inpkt.Idx)
+			err = fmt.Errorf("transcode: PacketDuration() failed for output video stream #%d", inpkt.Idx)
 			return
 		}
 		outpkt := av.Packet{Idx: inpkt.Idx, Data: _outpkt}
