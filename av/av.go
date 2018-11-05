@@ -179,8 +179,8 @@ type CodecData interface {
 
 type VideoCodecData interface {
 	CodecData
-	Width() int // Video height
-	Height() int // Video width
+	Width() int // Video width
+	Height() int // Video height
 	Framerate() (int, int) // Video FPS num and denom
 	PacketDuration([]byte) (time.Duration, error) // get video compressed packet duration
 }
