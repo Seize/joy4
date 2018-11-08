@@ -151,7 +151,7 @@ func (self *tStream) videoDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 	}
 	self.timeline.Push(inpkt.Time, dur)
 
-	var _outpkts [][]byte
+	var _outpkts []av.Packet
 	if _outpkts, err = self.venc.Encode(frame); err != nil {
 		return
 	}
@@ -166,11 +166,12 @@ func (self *tStream) videoDecodeAndEncode(inpkt av.Packet) (outpkts []av.Packet,
 			}
 			self.vencodec = codecData.(av.VideoCodecData)
 		}
-		if dur, err = self.vencodec.PacketDuration(_outpkt); err != nil {
+		if dur, err = self.vencodec.PacketDuration(_outpkt.Data); err != nil {
 			err = fmt.Errorf("transcode: PacketDuration() failed for output video stream #%d", inpkt.Idx)
 			return
 		}
-		outpkt := av.Packet{Idx: inpkt.Idx, Data: _outpkt}
+		// TODO probably not needed now that _outpkt is an av.Packet 
+		outpkt := av.Packet{IsKeyFrame: _outpkt.IsKeyFrame, Idx: inpkt.Idx, Data: _outpkt.Data}
 		outpkt.Time = self.timeline.Pop(dur)
 
 		if Debug {

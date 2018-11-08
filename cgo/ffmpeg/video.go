@@ -497,7 +497,7 @@ func (enc *VideoEncoder) CodecData() (codec av.VideoCodecData, err error) {
 	return
 }
 
-func (enc *VideoEncoder) encodeOne(img *VideoFrame) (gotpkt bool, pkt []byte, err error) {
+func (enc *VideoEncoder) encodeOne(img *VideoFrame) (gotpkt bool, pkt av.Packet, err error) {
 	if err = enc.prepare(); err != nil {
 		return
 	}
@@ -561,7 +561,7 @@ func (enc *VideoEncoder) encodeOne(img *VideoFrame) (gotpkt bool, pkt []byte, er
 			fmt.Println("Encoded video bitrate (kbps):", kbps)
 		}
 	}
-	return gotpkt, avpkt.Data, err
+	return gotpkt, avpkt, err
 }
 
 
@@ -604,9 +604,9 @@ func (self *VideoEncoder) convertFramerate(img *VideoFrame) (out []*VideoFrame, 
 }
 
 
-func (enc *VideoEncoder) Encode(img *VideoFrame) (pkts [][]byte, err error) {
+func (enc *VideoEncoder) Encode(img *VideoFrame) (pkts []av.Packet, err error) {
 	var gotpkt bool
-	var pkt []byte
+	var pkt av.Packet
 	var frames []*VideoFrame
 
 	// If the input framerate and desired encoding framerate differ, convert using FramerateConverter
