@@ -250,7 +250,6 @@ func (self *FramerateConverter) ConvertFramerate(in *VideoFrame) (out []*VideoFr
 	if self.graph == nil {
 		err = self.ConfigureVideoFilters()
 		if err != nil {
-			fmt.Println("ConfigureVideoFilters failed:", err)
 			return
 		}
 	}
