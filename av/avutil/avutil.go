@@ -309,3 +309,52 @@ func CopyFile(dst av.Muxer, src av.Demuxer) (err error) {
 	}
 	return
 }
+
+// CopyPacketsFromKeyframe copies packets from src to dst, but start copying video packets only after receiving a first keyframe
+func CopyPacketsFromKeyframe(dst av.PacketWriter, src av.PacketReader, videoIdx int8) (err error) {
+	videoInit := false
+	for {
+		var pkt av.Packet
+		if pkt, err = src.ReadPacket(); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return
+		}
+
+		// start copying video only after receiving a key frame
+		if !videoInit && pkt.Idx == videoIdx && pkt.IsKeyFrame {
+			videoInit = true
+		}
+
+		if pkt.Idx == videoIdx && !videoInit {
+			continue
+		}
+
+		if err = dst.WritePacket(pkt); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// CopyFileFromKeyframe acts like CopyFile but uses CopyPacketsFromKeyframe to copy
+// the video stream only after receiving a key frame
+func CopyFileFromKeyframe(dst av.Muxer, src av.Demuxer, videoIdx int8) (err error) {
+	var streams []av.CodecData
+	if streams, err = src.Streams(); err != nil {
+		return
+	}
+	if err = dst.WriteHeader(streams); err != nil {
+		return
+	}
+	if err = CopyPacketsFromKeyframe(dst, src, videoIdx); err != nil {
+		if err != io.EOF {
+			return
+		}
+	}
+	if err = dst.WriteTrailer(); err != nil {
+		return
+	}
+	return
+}
