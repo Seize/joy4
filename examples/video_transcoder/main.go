@@ -118,6 +118,7 @@ func main() {
 		delete(channels, conn.URL.Path)
 		l.Unlock()
 		ch.que.Close()
+		trans.Close()
 	}
 
 	http.HandleFunc("/file", func(w http.ResponseWriter, r *http.Request) {
@@ -142,6 +143,7 @@ func main() {
 		muxer := flv.NewMuxerWriteFlusher(writeFlusher{httpflusher: flusher, Writer: w})
 		avutil.CopyFile(muxer, trans)
 		file.Close()
+		trans.Close()
 	})
 
 	go http.ListenAndServe(":8089", nil)
