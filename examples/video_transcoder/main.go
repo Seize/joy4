@@ -141,7 +141,10 @@ func main() {
 		}
 
 		muxer := flv.NewMuxerWriteFlusher(writeFlusher{httpflusher: flusher, Writer: w})
-		avutil.CopyFile(muxer, trans)
+		err := avutil.CopyFile(muxer, trans)
+		if err != nil {
+			fmt.Println("Error in CopyFile():", err)
+		}
 		file.Close()
 		trans.Close()
 	})
