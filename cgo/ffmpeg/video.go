@@ -402,7 +402,6 @@ type VideoEncoder struct {
 	pts int64
 	scaler *VideoScaler
 	framerateConverter *FramerateConverter
-	bm av.BitrateMeasure
 }
 
 // Setup initializes the encoder context and checks user params
@@ -556,11 +555,6 @@ func (enc *VideoEncoder) encodeOne(img *VideoFrame) (gotpkt bool, pkt av.Packet,
 		fmt.Println("ffmpeg: no pkt !")
 	}
 
-	if debug {
-		if ok, kbps := enc.bm.Measure(len(avpkt.Data)); ok {
-			fmt.Println("Encoded video bitrate (kbps):", kbps)
-		}
-	}
 	return gotpkt, avpkt, err
 }
 

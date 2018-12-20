@@ -409,35 +409,3 @@ func (s ScanningMode) String() string {
 	}
 	return "Unknown scanning mode"
 }
-
-type BitrateMeasure struct {
-	lastPrint time.Time
-	sumBytes int
-	AvgKbps int
-}
-
-func (bm *BitrateMeasure) Measure(size int) (measureReady bool, bitrateKbps int) {
-	bm.sumBytes += size
-	now := time.Now()
-	if bm.lastPrint.IsZero() {
-		bm.lastPrint = now
-	} else {
-		diff := now.Sub(bm.lastPrint)
-		if diff > 3*time.Second {
-			bitrate := (8 * bm.sumBytes) / int(1000 * diff.Seconds())
-			bm.sumBytes = 0
-			bm.lastPrint = now
-			if bm.AvgKbps == 0 {
-				bm.AvgKbps = bitrate
-			} else {
-				bm.AvgKbps = (bm.AvgKbps + bitrate)/2
-			}
-			return true, bitrate
-		}
-	}
-	return false, 0
-}
-
-func (bm BitrateMeasure) String() string {
-	return fmt.Sprintf("%d kbps", bm.AvgKbps)
-}
