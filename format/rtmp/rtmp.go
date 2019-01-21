@@ -1608,8 +1608,9 @@ func (self *Conn) handshakeServer() (err error) {
 		var ok bool
 		var digest []byte
 		if ok, digest = hsParse1(C1, hsClientPartialKey, hsServerFullKey); !ok {
-			err = fmt.Errorf("rtmp: handshake server: C1 invalid")
-			return
+			fmt.Println("rtmp: handshake server: C1 invalid")
+			// err = fmt.Errorf("rtmp: handshake server: C1 invalid")
+			// return
 		}
 		hsCreate01(S0S1, srvtime, srvver, hsServerPartialKey)
 		hsCreate2(S2, digest)
