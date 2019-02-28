@@ -1605,13 +1605,9 @@ func (self *Conn) handshakeServer() (err error) {
 	cliver := pio.U32BE(C1[4:8])
 
 	if cliver != 0 {
-		var ok bool
 		var digest []byte
-		if ok, digest = hsParse1(C1, hsClientPartialKey, hsServerFullKey); !ok {
-			fmt.Println("rtmp: handshake server: C1 invalid")
-			// err = fmt.Errorf("rtmp: handshake server: C1 invalid")
-			// return
-		}
+		// FIXME check if hsParse1 returns ok. Ignored atm because it seems buggy
+		_, digest = hsParse1(C1, hsClientPartialKey, hsServerFullKey)
 		hsCreate01(S0S1, srvtime, srvver, hsServerPartialKey)
 		hsCreate2(S2, digest)
 	} else {
