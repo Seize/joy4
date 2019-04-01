@@ -87,6 +87,19 @@ func (v VideoFrame) GetScanningMode() (mode av.ScanningMode) {
 	return av.Progressive
 }
 
+// GetPictureType returns the encoded picture type
+func (v VideoFrame) GetPictureType() (picType h264parser.SliceType, err error) {
+	switch v.frame.pict_type {
+	case C.AV_PICTURE_TYPE_I:
+		return h264parser.SLICE_I, nil
+	case C.AV_PICTURE_TYPE_P:
+		return h264parser.SLICE_P, nil
+	case C.AV_PICTURE_TYPE_B:
+		return h264parser.SLICE_B, nil
+	}
+	return 0, fmt.Errorf("Unsupported picture type: %d", int(v.frame.pict_type))
+}
+
 func (v *VideoFrame) SetPixelFormat(format av.PixelFormat) {
 	v.frame.format = C.int32_t(PixelFormatAV2FF(format))
 }
